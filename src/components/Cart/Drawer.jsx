@@ -1,24 +1,21 @@
 import CartItems from "./CartItems";
 
-export default function Drawer() {
+export default function Drawer({ onCartClose, items = [] }) {
   return (
-    <div style={{ display: "none" }} className="overlay">
+    <div className="overlay">
       <div className="drawer">
         <h2 className="d-flex justify-between mb-30">
-          Корзина <img src="/img/btn-remove.svg" alt="Remove" />
+          Корзина{" "}
+          <img onClick={onCartClose} src="/img/btn-remove.svg" alt="Close" />
         </h2>
         {/* Сделать gap и переписать стили в SCSS */}
         <div className="items">
-          <CartItems
-            name={"Мужские Кроссовки Nike Air Max 270"}
-            price={"12 999 руб."}
-            img={"/img/sneakers/1.jpg"}
-          />
-          <CartItems
-            name={"Мужские Кроссовки Nike Air Max 270"}
-            price={"12 999 руб."}
-            img={"/img/sneakers/1.jpg"}
-          />
+          {items.map(
+            (obj) => (
+              (<CartItems name={obj.name} price={obj.price} img={obj.img} />),
+              (<CartItems name={obj.name} price={obj.price} img={obj.img} />)
+            )
+          )}
         </div>
 
         <div className="cartTotalBlock">

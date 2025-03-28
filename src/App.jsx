@@ -1,13 +1,33 @@
-import { useState } from "react";
-import Card from "./components/card";
+import { useEffect, useState } from "react";
+import Card from "./components/Card/Card";
 import Header from "./components/Header";
 import Drawer from "./components/Cart/Drawer";
 
 function App() {
+  const [items, setItems] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
+  const [cartOpened, setCartOpened] = useState(false);
+
+  useEffect(() => {
+    fetch("https://67e3d5cd2ae442db76d1ce46.mockapi.io/items")
+      .then((res) => {
+        return res.json();
+      })
+      .then((json) => {
+        setItems(json);
+      });
+  }, [setItems]);
+
+  const onAddToCart = (obj) => {
+    setCartItems((prev) => [...prev, obj]);
+  };
+
   return (
     <div className="wrapper clear">
-      <Drawer />
-      <Header />
+      {cartOpened && (
+        <Drawer items={cartItems} onCartClose={() => setCartOpened(false)} />
+      )}
+      <Header onClickCart={() => setCartOpened(true)} />
 
       <div className="content p-40 flex-row">
         <div className="d-flex justify-between align-center mb-40">
@@ -18,32 +38,16 @@ function App() {
           </div>
         </div>
 
-        <div className="table d-flex">
-          <Card
-            name="Мужские Кроссовки Nike Blazer Mid Suede"
-            price="12 999 руб."
-            img="/img/sneakers/1.jpg"
-          />
-          <Card
-            name="Мужские Кроссовки Nike Air Max 270"
-            price="12 999 руб."
-            img="/img/sneakers/2.jpg"
-          />
-          <Card
-            name="Мужские Кроссовки Nike Blazer Mid Suede"
-            price="8 499 руб."
-            img="/img/sneakers/3.jpg"
-          />
-          <Card
-            name="Кроссовки Puma X Aka Boku Future Rider"
-            price="8 999 руб."
-            img="/img/sneakers/4.jpg"
-          />
-          <Card
-            name="Кроссовки Puma X Aka Boku Future Rider"
-            price="8 999 руб."
-            img="/img/sneakers/4.jpg"
-          />
+        <div className="table d-flex flex-wrap">
+          {items.map((obj) => (
+            <Card
+              name={obj.name}
+              price={obj.price}
+              img={obj.img}
+              onPlus={(item) => onAddToCart(item)}
+              onFavorite={() => console.log("Добавили в закладки")}
+            />
+          ))}
         </div>
       </div>
     </div>
