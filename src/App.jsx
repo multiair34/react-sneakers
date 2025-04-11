@@ -1,55 +1,97 @@
 import { useEffect, useState } from "react";
-import Card from "./components/Card/Card";
+import axios from "axios";
 import Header from "./components/Header";
 import Drawer from "./components/Cart/Drawer";
+import { Route, Routes } from "react-router";
+import Favorites from "./components/pages/Favorites";
+import Home from "./components/pages/Home";
 
 function App() {
   const [items, setItems] = useState([]);
   const [cartItems, setCartItems] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
   const [cartOpened, setCartOpened] = useState(false);
 
   useEffect(() => {
-    fetch("https://67e3d5cd2ae442db76d1ce46.mockapi.io/items")
+    axios
+      .get("https://67e3d5cd2ae442db76d1ce46.mockapi.io/items")
       .then((res) => {
-        return res.json();
-      })
-      .then((json) => {
-        setItems(json);
+        setItems(res.data);
+      });
+    axios
+      .get("https://67e3d5cd2ae442db76d1ce46.mockapi.io/cart")
+      .then((res) => {
+        setCartItems(res.data);
+      });
+    axios
+      .get("https://67e3d5cd2ae442db76d1ce46.mockapi.io/cart")
+      .then((res) => {
+        setFavorites(res.data);
       });
   }, [setItems]);
 
   const onAddToCart = (obj) => {
+    axios.post("https://67e3d5cd2ae442db76d1ce46.mockapi.io/cart", obj);
     setCartItems((prev) => [...prev, obj]);
+  };
+
+  const onRemoveItem = (id) => {
+    axios.delete(`https://67e3d5cd2ae442db76d1ce46.mockapi.io/cart/${id}`);
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const onChangeSearchInput = (event) => {
+    setSearchValue(event.target.value);
+  };
+
+  const onAddToFavorite = (obj) => {
+    if (favorites.find((favObj) => favObj.id == obj.id)) {
+      axios.delete(
+        `https://67e3d5cd2ae442db76d1ce46.mockapi.io/cart/${obj.id}`
+      );
+      setFavorites((prev) => prev.filter((item) => item.id !== obj.id));
+    } else {
+      axios.post("https://67e3d5cd2ae442db76d1ce46.mockapi.io/cart", obj);
+      setFavorites((prev) => [...prev, obj]);
+    }
   };
 
   return (
     <div className="wrapper clear">
       {cartOpened && (
-        <Drawer items={cartItems} onCartClose={() => setCartOpened(false)} />
+        <Drawer
+          items={cartItems}
+          onRemove={onRemoveItem}
+          onCartClose={() => setCartOpened(false)}
+        />
       )}
+
       <Header onClickCart={() => setCartOpened(true)} />
-
-      <div className="content p-40 flex-row">
-        <div className="d-flex justify-between align-center mb-40">
-          <h1>Все кроссовки</h1>
-          <div className="search d-flex">
-            <img src="/img/search.svg" alt="Search" />
-            <input placeholder="Поиск..." />
-          </div>
-        </div>
-
-        <div className="table d-flex flex-wrap">
-          {items.map((obj) => (
-            <Card
-              name={obj.name}
-              price={obj.price}
-              img={obj.img}
-              onPlus={(item) => onAddToCart(item)}
-              onFavorite={() => console.log("Добавили в закладки")}
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Home
+              items={items}
+              searchValue={searchValue}
+              onChangeSearchInput={onChangeSearchInput}
+              onAddFavorite={onAddToFavorite}
+              onAddToCart={onAddToCart}
             />
-          ))}
-        </div>
-      </div>
+          }
+        />
+        <Route
+          path="/favorites"
+          element={
+            <Favorites
+              items={favorites}
+              onAddFavorite={onAddToFavorite}
+              onAddToCart={onAddToCart}
+            />
+          }
+        />
+      </Routes>
     </div>
   );
 }

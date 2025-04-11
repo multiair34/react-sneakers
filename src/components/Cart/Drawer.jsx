@@ -1,6 +1,4 @@
-import CartItems from "./CartItems";
-
-export default function Drawer({ onCartClose, items = [] }) {
+export default function Drawer({ onRemove, onCartClose, items = [] }) {
   return (
     <div className="overlay">
       <div className="drawer">
@@ -10,12 +8,28 @@ export default function Drawer({ onCartClose, items = [] }) {
         </h2>
         {/* Сделать gap и переписать стили в SCSS */}
         <div className="items">
-          {items.map(
-            (obj) => (
-              (<CartItems name={obj.name} price={obj.price} img={obj.img} />),
-              (<CartItems name={obj.name} price={obj.price} img={obj.img} />)
-            )
-          )}
+          {items.map((obj) => (
+            <div className="cartItem d-flex align-center mb-20">
+              <img
+                className="mr-20"
+                width={70}
+                height={70}
+                key={obj.name}
+                src={obj.img}
+                alt={obj.name}
+              />
+              <div className="mr-20">
+                <p className="mb-5">{obj.name}</p>
+                <b>{obj.price}</b>
+              </div>
+              <img
+                onClick={() => onRemove(obj.id)}
+                className="removeBtn"
+                src="/img/btn-remove.svg"
+                alt="Remove"
+              />
+            </div>
+          ))}
         </div>
 
         <div className="cartTotalBlock">
